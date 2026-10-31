@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brightloop - Admin Dashboard</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    .animate-fade-in { animation: fadeIn 0.15s ease-out forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex font-sans overflow-x-hidden">
+
+  <!-- ============================================== -->
+  <!-- MOBILE SIDEBAR BACKDROP                        -->
+  <!-- ============================================== -->
+  <div id="sidebar-backdrop" onclick="closeSidebar()" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs hidden lg:hidden transition-opacity"></div>
+
+  <!-- ============================================== -->
+  <!-- MAIN NAVIGATION SIDEBAR                        -->
+  <!-- ============================================== -->
+  <aside
+    id="sidebar"
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col justify-between transition-transform duration-200 ease-in-out -translate-x-full lg:translate-x-0 lg:static lg:z-auto shadow-xl lg:shadow-none"
+  >
+    <!-- Sidebar Header & Brand -->
+    <div>
+      <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800/80">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-md shadow-indigo-500/20">
+            B
+          </div>
+          <div>
+            <span class="text-lg font-bold tracking-tight text-white">Bright<span class="text-indigo-400">loop</span></span>
+            <span class="ml-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800/60">Admin</span>
+          </div>
+        </div>
+        <button onclick="closeSidebar()" class="lg:hidden text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="px-4 py-6">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2">Member 2 Modules</p>
+        <nav class="space-y-1">
+          <!-- 1. Dashboard -->
+          <button
+            id="nav-dashboard"
+            onclick="switchView('dashboard')"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all text-white bg-indigo-600 shadow-sm shadow-indigo-600/30"
+          >
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            <span>Overview Dashboard</span>
+          </button>
+
+          <!-- 2. Products -->
+          <button
+            id="nav-products"
+            onclick="switchView('products')"
+            class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              <span>Products & Catalog</span>
+            </div>
+            <span id="badge-products-count" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">0</span>
+          </button>
+
+          <!-- 3. Subscription Plans -->
+          <button
+            id="nav-plans"
+            onclick="switchView('plans')"
+            class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <span>Subscription Plans</span>
+            </div>
+            <span id="badge-plans-count" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">0</span>
+          </button>
+
+          <!-- 4. Taxes -->
+          <button
+            id="nav-taxes"
+            onclick="switchView('taxes')"
+            class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+              </svg>
+              <span>Tax Management</span>
+            </div>
+            <span id="badge-taxes-count" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">0</span>
+          </button>
+
+          <!-- 5. Discounts -->
+          <button
+            id="nav-discounts"
+            onclick="switchView('discounts')"
+            class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              <span>Discounts & Promos</span>
+            </div>
+            <span id="badge-discounts-count" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">0</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="p-4 border-t border-slate-800/80">
+      <div class="p-3 bg-slate-800/40 rounded-xl border border-slate-800 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center text-xs shrink-0 border border-indigo-500/30">
+          M2
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-white truncate">Member 2</p>
+          <p class="text-[10px] text-emerald-400 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            localStorage synced
+          </p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================== -->
+  <!-- MAIN APP CONTAINER                             -->
+  <!-- ============================================== -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-screen">
+
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-slate-200 h-16 sticky top-0 z-30 shadow-xs flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-3">
+        <!-- Mobile Sidebar Toggle -->
+        <button onclick="openSidebar()" class="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <div>
+          <span id="header-breadcrumb" class="text-xs font-medium text-slate-400 hidden sm:inline">Brightloop / </span>
+          <span id="header-title" class="text-sm font-bold text-slate-800">Overview Dashboard</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Global Reset All Demo Data -->
+        <button
+          onclick="resetAllDemoData()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-xs transition"
+          title="Restore all 4 modules to default sample records"
+        >
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span class="hidden sm:inline">Reset All Data</span>
+        </button>
+
+        <span class="h-5 w-px bg-slate-200"></span>
+
+        <!-- Standalone Page Quick Links Dropdown -->
+        <div class="relative group">
+          <button class="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition flex items-center gap-1.5">
+            <span>Standalone Files</span>
+            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute right-0 mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-lg p-1 hidden group-hover:block z-40 text-xs">
+            <a href="products.html" target="_blank" class="block px-3 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50">products.html ↗</a>
+            <a href="plans.html" target="_blank" class="block px-3 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50">plans.html ↗</a>
+            <a href="taxes.html" target="_blank" class="block px-3 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50">taxes.html ↗</a>
+            <a href="discounts.html" target="_blank" class="block px-3 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50">discounts.html ↗</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main View Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+      <!-- ============================================== -->
+      <!-- SECTION 1: OVERVIEW DASHBOARD                  -->
+      <!-- ============================================== -->
+      <section id="view-dashboard" class="view-panel space-y-6">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">System Overview</h1>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Unified status of products, recurring plans, tax rules, and promotional discounts.</p>
+        </div>
+
+        <!-- Dashboard Top 4 Metrics -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div onclick="switchView('products')" class="cursor-pointer bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-indigo-500 hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Products</span>
+              <span class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+              </span>
+            </div>
+            <p id="dash-products-total" class="text-3xl font-extrabold text-slate-900 mt-2">0</p>
+            <p id="dash-products-desc" class="text-xs text-slate-500 mt-1">0 active in catalog</p>
+          </div>
+
+          <div onclick="switchView('plans')" class="cursor-pointer bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-indigo-500 hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Subscription Plans</span>
+              <span class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              </span>
+            </div>
+            <p id="dash-plans-total" class="text-3xl font-extrabold text-slate-900 mt-2">0</p>
+            <p id="dash-plans-desc" class="text-xs text-slate-500 mt-1">Across 4 billing cycles</p>
+          </div>
+
+          <div onclick="switchView('taxes')" class="cursor-pointer bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-indigo-500 hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tax Rates</span>
+              <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+              </span>
+            </div>
+            <p id="dash-taxes-total" class="text-3xl font-extrabold text-slate-900 mt-2">0</p>
+            <p id="dash-taxes-desc" class="text-xs text-slate-500 mt-1">GST & VAT brackets</p>
+          </div>
+
+          <div onclick="switchView('discounts')" class="cursor-pointer bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-indigo-500 hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Discounts & Promos</span>
+              <span class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+              </span>
+            </div>
+            <p id="dash-discounts-total" class="text-3xl font-extrabold text-slate-900 mt-2">0</p>
+            <p id="dash-discounts-desc" class="text-xs text-slate-500 mt-1">Active promotional codes</p>
+          </div>
+        </div>
+
+        <!-- Quick Access & Cross Connection Map -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Module Overview Cards -->
+          <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-slate-900">Module Connections</h3>
+              <span class="text-xs text-slate-400">Shared localStorage State</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-slate-800">Products & Plans</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700">Connected</span>
+                  </div>
+                  <p class="text-slate-500 text-[11px] leading-relaxed">
+                    Subscription plans dynamically read the products catalog. Adding a new SaaS product immediately exposes it in the Plans creator.
+                  </p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
+                  <button onclick="switchView('products'); openAddProductModal();" class="text-indigo-600 font-semibold hover:underline">+ New Product</button>
+                  <button onclick="switchView('plans'); openAddPlanModal();" class="text-blue-600 font-semibold hover:underline">+ New Plan</button>
+                </div>
+              </div>
+
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-slate-800">Taxes & Jurisdictions</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700">Independent</span>
+                  </div>
+                  <p class="text-slate-500 text-[11px] leading-relaxed">
+                    Full GST (5%, 12%, 18%, 28%) and VAT rate management. Product pricing tax codes bind seamlessly to active tax rates.
+                  </p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
+                  <button onclick="switchView('taxes'); openAddTaxModal();" class="text-emerald-600 font-semibold hover:underline">+ New Tax Rule</button>
+                  <span id="dash-gst-summary" class="text-slate-400 text-[11px]">4 GST Brackets</span>
+                </div>
+              </div>
+
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-between sm:col-span-2">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-slate-800">Discounts & Promos Linking</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700">Multi-Target Scope</span>
+                  </div>
+                  <p class="text-slate-500 text-[11px] leading-relaxed">
+                    Coupons can target Storewide, Specific Products, or Specific Plans with automatic 100% capping and date expiry checks.
+                  </p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
+                  <button onclick="switchView('discounts'); openAddDiscountModal();" class="text-purple-600 font-semibold hover:underline">+ New Discount Campaign</button>
+                  <span id="dash-discount-active-summary" class="text-slate-400 text-[11px]"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions & Stats -->
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4">
+            <h3 class="text-base font-bold text-slate-900">Quick Navigation</h3>
+            <div class="space-y-2">
+              <button onclick="switchView('products')" class="w-full text-left p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center justify-between text-xs transition">
+                <span class="font-semibold text-slate-700">Manage Products Catalog</span>
+                <span class="text-slate-400">→</span>
+              </button>
+              <button onclick="switchView('plans')" class="w-full text-left p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center justify-between text-xs transition">
+                <span class="font-semibold text-slate-700">Manage Subscription Plans</span>
+                <span class="text-slate-400">→</span>
+              </button>
+              <button onclick="switchView('taxes')" class="w-full text-left p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center justify-between text-xs transition">
+                <span class="font-semibold text-slate-700">Manage Tax Rates & GST</span>
+                <span class="text-slate-400">→</span>
+              </button>
+              <button onclick="switchView('discounts')" class="w-full text-left p-3 rounded-xl border border-slate-100 hover:bg-slate-50 flex items-center justify-between text-xs transition">
+                <span class="font-semibold text-slate-700">Manage Coupons & Vouchers</span>
+                <span class="text-slate-400">→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SECTION 2: PRODUCTS MANAGEMENT                 -->
+      <!-- ============================================== -->
+      <section id="view-products" class="view-panel hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div class="text-xs font-medium text-slate-400 flex items-center gap-1.5 mb-1">
+              <span>Catalog</span> / <span class="text-indigo-600 font-semibold">Products</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Products & Catalog</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Manage subscription tiers, add-on modules, and metered billing items.</p>
+          </div>
+          <button
+            onclick="openAddProductModal()"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>Add Product</span>
+          </button>
+        </div>
+
+        <!-- Products Search and Filter -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div class="relative flex-1">
+              <input
+                id="prod-search"
+                type="text"
+                placeholder="Search products by name, SKU, or description..."
+                oninput="renderProducts()"
+                class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              />
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="prod-cat-filter" onchange="renderProducts()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Categories</option>
+                <option value="SaaS Platform">SaaS Platform</option>
+                <option value="Add-on">Add-on</option>
+                <option value="API Access">API Access</option>
+                <option value="Professional Services">Professional Services</option>
+              </select>
+              <select id="prod-status-filter" onchange="renderProducts()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Draft">Draft</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+              <select id="prod-sort" onchange="renderProducts()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="newest">Sort: Newest</option>
+                <option value="name-asc">Sort: Name (A-Z)</option>
+                <option value="price-low">Price (Low → High)</option>
+                <option value="price-high">Price (High → Low)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 text-[11px] uppercase tracking-wider font-semibold text-slate-500 border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Product</th>
+                  <th class="px-4 py-3">Category</th>
+                  <th class="px-4 py-3">Billing Model</th>
+                  <th class="px-4 py-3">Base Price</th>
+                  <th class="px-4 py-3">Linked Plans</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="prod-table-body" class="divide-y divide-slate-100 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SECTION 3: SUBSCRIPTION PLANS                  -->
+      <!-- ============================================== -->
+      <section id="view-plans" class="view-panel hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div class="text-xs font-medium text-slate-400 flex items-center gap-1.5 mb-1">
+              <span>Pricing</span> / <span class="text-indigo-600 font-semibold">Subscription Plans</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Subscription Plans</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Define recurring cycles (Daily, Weekly, Monthly, Yearly), minimum seat limits, and price tiers.</p>
+          </div>
+          <button
+            onclick="openAddPlanModal()"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>Add Plan</span>
+          </button>
+        </div>
+
+        <!-- Plans Search and Filter -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div class="relative flex-1">
+              <input
+                id="plan-search"
+                type="text"
+                placeholder="Search plans by name, Plan ID, or linked product..."
+                oninput="renderPlans()"
+                class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              />
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="plan-cycle-filter" onchange="renderPlans()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Cycles</option>
+                <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Yearly">Yearly</option>
+              </select>
+              <select id="plan-status-filter" onchange="renderPlans()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Draft">Draft</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+              <select id="plan-sort" onchange="renderPlans()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="newest">Sort: Newest</option>
+                <option value="name-asc">Sort: Name (A-Z)</option>
+                <option value="price-low">Price (Low → High)</option>
+                <option value="price-high">Price (High → Low)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plans Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 text-[11px] uppercase tracking-wider font-semibold text-slate-500 border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Plan Name</th>
+                  <th class="px-4 py-3">Plan ID</th>
+                  <th class="px-4 py-3">Linked Product</th>
+                  <th class="px-4 py-3">Cycle</th>
+                  <th class="px-4 py-3">Price</th>
+                  <th class="px-4 py-3">Min Qty</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="plan-table-body" class="divide-y divide-slate-100 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SECTION 4: TAX MANAGEMENT                      -->
+      <!-- ============================================== -->
+      <section id="view-taxes" class="view-panel hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div class="text-xs font-medium text-slate-400 flex items-center gap-1.5 mb-1">
+              <span>Settings</span> / <span class="text-indigo-600 font-semibold">Taxes</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Tax Management</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Configure GST brackets (5%, 12%, 18%, 28%), VAT rates, and jurisdiction rules.</p>
+          </div>
+          <button
+            onclick="openAddTaxModal()"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>Add Tax</span>
+          </button>
+        </div>
+
+        <!-- Tax Search & Filter -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div class="relative flex-1">
+              <input
+                id="tax-search"
+                type="text"
+                placeholder="Search taxes by name, Tax ID, type, or notes..."
+                oninput="renderTaxes()"
+                class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              />
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="tax-type-filter" onchange="renderTaxes()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Types</option>
+                <option value="GST">GST</option>
+                <option value="VAT">VAT</option>
+                <option value="Sales Tax">Sales Tax</option>
+              </select>
+              <select id="tax-status-filter" onchange="renderTaxes()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+              <select id="tax-sort" onchange="renderTaxes()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="newest">Sort: Newest</option>
+                <option value="name-asc">Sort: Name (A-Z)</option>
+                <option value="rate-high">Rate (High → Low)</option>
+                <option value="rate-low">Rate (Low → High)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Taxes Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 text-[11px] uppercase tracking-wider font-semibold text-slate-500 border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Tax ID</th>
+                  <th class="px-4 py-3">Tax Name</th>
+                  <th class="px-4 py-3">Type</th>
+                  <th class="px-4 py-3">Rate (%)</th>
+                  <th class="px-4 py-3">Description</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tax-table-body" class="divide-y divide-slate-100 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SECTION 5: DISCOUNTS MANAGEMENT                -->
+      <!-- ============================================== -->
+      <section id="view-discounts" class="view-panel hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div class="text-xs font-medium text-slate-400 flex items-center gap-1.5 mb-1">
+              <span>Marketing</span> / <span class="text-indigo-600 font-semibold">Discounts</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Discounts & Promos</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Manage promo codes, percentage or fixed discounts, and item scope bindings.</p>
+          </div>
+          <button
+            onclick="openAddDiscountModal()"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-sm shadow-indigo-200 transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>Add Discount</span>
+          </button>
+        </div>
+
+        <!-- Discounts Search and Filter -->
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-3">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div class="relative flex-1">
+              <input
+                id="disc-search"
+                type="text"
+                placeholder="Search discounts by code, name, scope, or description..."
+                oninput="renderDiscounts()"
+                class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              />
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="disc-type-filter" onchange="renderDiscounts()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Types</option>
+                <option value="Percentage">Percentage</option>
+                <option value="Fixed Amount">Fixed Amount</option>
+              </select>
+              <select id="disc-scope-filter" onchange="renderDiscounts()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Scopes</option>
+                <option value="all">Storewide (All)</option>
+                <option value="products">Specific Products</option>
+                <option value="plans">Specific Plans</option>
+              </select>
+              <select id="disc-status-filter" onchange="renderDiscounts()" class="text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white">
+                <option value="All">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Expired">Expired</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discounts Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-50 text-[11px] uppercase tracking-wider font-semibold text-slate-500 border-b border-slate-200">
+                <tr>
+                  <th class="px-4 py-3">Code / ID</th>
+                  <th class="px-4 py-3">Discount Name</th>
+                  <th class="px-4 py-3">Type</th>
+                  <th class="px-4 py-3">Value</th>
+                  <th class="px-4 py-3">Scope / Targets</th>
+                  <th class="px-4 py-3">Validity</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="disc-table-body" class="divide-y divide-slate-100 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODALS CONTAINER                               -->
+  <!-- ============================================== -->
+
+  <!-- 1. PRODUCT MODAL (Add/Edit) -->
+  <div id="modal-product" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 space-y-4 animate-fade-in">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modal-prod-title" class="text-lg font-bold text-slate-900">Add Product</h3>
+        <button onclick="closeModal('modal-product')" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <form id="form-product" onsubmit="saveProduct(event)" class="space-y-4">
+        <input type="hidden" id="prod-form-id" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Product Name *</label>
+            <input id="prod-form-name" type="text" required placeholder="e.g. Cloud Starter" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">SKU / Code *</label>
+            <input id="prod-form-sku" type="text" required placeholder="e.g. BL-STR" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 uppercase font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Category *</label>
+            <select id="prod-form-category" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <option value="SaaS Platform">SaaS Platform</option>
+              <option value="Add-on">Add-on</option>
+              <option value="API Access">API Access</option>
+              <option value="Professional Services">Professional Services</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Status *</label>
+            <select id="prod-form-status" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <option value="Active">Active</option>
+              <option value="Draft">Draft</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Billing Model *</label>
+            <select id="prod-form-billing" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <option value="Recurring">Recurring Subscription</option>
+              <option value="One-time">One-time</option>
+              <option value="Metered">Metered</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Base Price ($) *</label>
+            <input id="prod-form-price" type="number" step="0.01" min="0" required placeholder="29.00" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+          <textarea id="prod-form-desc" rows="2" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500" placeholder="Product details..."></textarea>
+        </div>
+        <div class="border-t border-slate-100 pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-product')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. PLAN MODAL (Add/Edit) -->
+  <div id="modal-plan" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 space-y-4 animate-fade-in">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modal-plan-title" class="text-lg font-bold text-slate-900">Add Subscription Plan</h3>
+        <button onclick="closeModal('modal-plan')" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <form id="form-plan" onsubmit="savePlan(event)" class="space-y-4">
+        <input type="hidden" id="plan-form-id" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Plan Name *</label>
+            <input id="plan-form-name" type="text" required placeholder="e.g. Starter Monthly" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Plan ID *</label>
+            <input id="plan-form-planid" type="text" required placeholder="e.g. PLAN-STR-M" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 uppercase font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Linked Product *</label>
+            <select id="plan-form-product" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <!-- Dynamically populated from products -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Billing Cycle *</label>
+            <select id="plan-form-cycle" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <option value="Daily">Daily</option>
+              <option value="Weekly">Weekly</option>
+              <option value="Monthly" selected>Monthly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Price ($) *</label>
+            <input id="plan-form-price" type="number" step="0.01" min="0" required placeholder="29.00" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Min Qty *</label>
+            <input id="plan-form-minqty" type="number" min="1" step="1" value="1" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Status *</label>
+          <select id="plan-form-status" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+            <option value="Active">Active</option>
+            <option value="Draft">Draft</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="border-t border-slate-100 pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-plan')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm">Save Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. TAX MODAL (Add/Edit) -->
+  <div id="modal-tax" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl p-6 space-y-4 animate-fade-in">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modal-tax-title" class="text-lg font-bold text-slate-900">Add Tax Rate</h3>
+        <button onclick="closeModal('modal-tax')" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <!-- Quick GST Presets -->
+      <div class="flex flex-wrap gap-1.5 pb-2">
+        <button type="button" onclick="applyTaxPreset('GST 5%', 'TAX-GST-05', 'GST', 5)" class="px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded border">GST 5%</button>
+        <button type="button" onclick="applyTaxPreset('GST 12%', 'TAX-GST-12', 'GST', 12)" class="px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded border">GST 12%</button>
+        <button type="button" onclick="applyTaxPreset('GST 18% (SaaS)', 'TAX-GST-18', 'GST', 18)" class="px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded border">GST 18%</button>
+        <button type="button" onclick="applyTaxPreset('GST 28%', 'TAX-GST-28', 'GST', 28)" class="px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded border">GST 28%</button>
+        <button type="button" onclick="applyTaxPreset('VAT 20%', 'TAX-VAT-20', 'VAT', 20)" class="px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded border">VAT 20%</button>
+      </div>
+      <form id="form-tax" onsubmit="saveTax(event)" class="space-y-4">
+        <input type="hidden" id="tax-form-id" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tax Name *</label>
+            <input id="tax-form-name" type="text" required placeholder="e.g. GST Standard (18%)" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tax ID / Code *</label>
+            <input id="tax-form-taxid" type="text" required placeholder="e.g. TAX-GST-18" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 uppercase font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tax Type *</label>
+            <select id="tax-form-type" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <option value="GST">GST</option>
+              <option value="VAT">VAT</option>
+              <option value="Sales Tax">Sales Tax</option>
+              <option value="Exempt">Exempt</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tax Rate (0-100%) *</label>
+            <input id="tax-form-rate" type="number" step="0.01" min="0" max="100" required placeholder="18.00" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Status *</label>
+          <select id="tax-form-status" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+          <textarea id="tax-form-desc" rows="2" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500" placeholder="Applicability notes..."></textarea>
+        </div>
+        <div class="border-t border-slate-100 pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-tax')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm">Save Tax</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. DISCOUNT MODAL (Add/Edit) -->
+  <div id="modal-discount" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl p-6 space-y-4 animate-fade-in">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modal-disc-title" class="text-lg font-bold text-slate-900">Add Discount</h3>
+        <button onclick="closeModal('modal-discount')" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <form id="form-discount" onsubmit="saveDiscount(event)" class="space-y-4">
+        <input type="hidden" id="disc-form-id" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Discount Name *</label>
+            <input id="disc-form-name" type="text" required placeholder="e.g. Welcome Promo" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Discount Code / ID *</label>
+            <input id="disc-form-code" type="text" required placeholder="e.g. WELCOME20" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 uppercase font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Discount Type *</label>
+            <select id="disc-form-type" onchange="updateDiscValLabel(this.value)" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <option value="Percentage">Percentage (%)</option>
+              <option value="Fixed Amount">Fixed Amount ($)</option>
+            </select>
+          </div>
+          <div>
+            <label id="disc-val-label" class="block text-xs font-semibold text-slate-700 mb-1">Discount Value (Max 100%) *</label>
+            <input id="disc-form-val" type="number" step="0.01" min="0.01" required placeholder="20.00" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Start Date *</label>
+            <input id="disc-form-start" type="date" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Expiry Date *</label>
+            <input id="disc-form-expiry" type="date" required class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white" />
+          </div>
+        </div>
+        <!-- Scope Connection: Products or Plans -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+          <label class="block text-xs font-semibold text-slate-800">Applies To Scope *</label>
+          <select id="disc-form-scope" onchange="toggleScopeInputs(this.value)" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+            <option value="all">All Products and Plans (Storewide)</option>
+            <option value="products">Specific Products</option>
+            <option value="plans">Specific Subscription Plans</option>
+          </select>
+          <div id="disc-scope-checkboxes" class="hidden pt-2 max-h-32 overflow-y-auto space-y-1 text-xs border-t border-slate-200">
+            <!-- Dynamically populated from products or plans -->
+          </div>
+        </div>
+        <div class="border-t border-slate-100 pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-discount')" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm">Save Discount</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. GLOBAL DELETE CONFIRMATION MODAL -->
+  <div id="modal-delete" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full border border-slate-200 shadow-2xl p-6 space-y-4 animate-fade-in text-center">
+      <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-slate-900">Confirm Deletion</h3>
+        <p id="delete-modal-msg" class="text-xs text-slate-500 mt-1"></p>
+      </div>
+      <div class="flex justify-center gap-2 pt-2">
+        <button onclick="closeModal('modal-delete')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+        <button id="confirm-delete-action" class="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm">Delete Record</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Alerts Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ============================================== -->
+  <!-- APPLICATION LOGIC                              -->
+  <!-- ============================================== -->
+  <script>
+    // --- 1. SHARED STORAGE KEYS ---
+    const KEYS = {
+      PRODUCTS: 'brightloop_products_data',
+      PLANS: 'brightloop_plans_data',
+      TAXES: 'brightloop_taxes_data',
+      DISCOUNTS: 'brightloop_discounts_data'
+    };
+
+    // --- 2. GLOBAL STATE ---
+    let state = {
+      products: [],
+      plans: [],
+      taxes: [],
+      discounts: [],
+      currentView: 'dashboard'
+    };
+
+    // --- 3. INITIAL DEMO DATASETS ---
+    const INITIAL_PRODUCTS = [
+      { id: 'prod-001', name: 'Brightloop Cloud Starter', sku: 'BL-STARTER', category: 'SaaS Platform', billingType: 'Recurring', basePrice: 29.0, status: 'Active', description: 'Essential subscription billing for startups.' },
+      { id: 'prod-002', name: 'Brightloop Cloud Pro', sku: 'BL-PRO', category: 'SaaS Platform', billingType: 'Recurring', basePrice: 79.0, status: 'Active', description: 'Advanced revenue analytics & webhooks.' },
+      { id: 'prod-003', name: 'Brightloop Cloud Enterprise', sku: 'BL-ENT', category: 'SaaS Platform', billingType: 'Recurring', basePrice: 249.0, status: 'Active', description: 'High-scale subscription orchestration with SLA.' },
+      { id: 'prod-004', name: 'Dedicated IP Add-on', sku: 'BL-ADDON-IP', category: 'Add-on', billingType: 'Recurring', basePrice: 15.0, status: 'Active', description: 'Static IPv4 egress address for webhooks.' },
+      { id: 'prod-005', name: 'High-Volume API Metering', sku: 'BL-MTR-API', category: 'API Access', billingType: 'Metered', basePrice: 0.05, status: 'Active', description: 'Tiered usage-based API calls.' }
+    ];
+
+    const INITIAL_PLANS = [
+      { id: 'plan-001', planId: 'PLAN-STR-M', name: 'Starter Monthly', linkedProduct: 'Brightloop Cloud Starter', billingCycle: 'Monthly', price: 29.0, minQuantity: 1, status: 'Active' },
+      { id: 'plan-002', planId: 'PLAN-STR-Y', name: 'Starter Yearly', linkedProduct: 'Brightloop Cloud Starter', billingCycle: 'Yearly', price: 290.0, minQuantity: 1, status: 'Active' },
+      { id: 'plan-003', planId: 'PLAN-PRO-M', name: 'Pro Monthly', linkedProduct: 'Brightloop Cloud Pro', billingCycle: 'Monthly', price: 79.0, minQuantity: 1, status: 'Active' },
+      { id: 'plan-004', planId: 'PLAN-PRO-Y', name: 'Pro Yearly', linkedProduct: 'Brightloop Cloud Pro', billingCycle: 'Yearly', price: 790.0, minQuantity: 1, status: 'Active' },
+      { id: 'plan-005', planId: 'PLAN-ENT-Y', name: 'Enterprise Annual', linkedProduct: 'Brightloop Cloud Enterprise', billingCycle: 'Yearly', price: 2490.0, minQuantity: 5, status: 'Active' }
+    ];
+
+    const INITIAL_TAXES = [
+      { id: 'tax-001', taxId: 'TAX-GST-18', name: 'GST Standard (Digital & SaaS)', taxType: 'GST', taxRate: 18.0, status: 'Active', description: 'Standard 18% GST for domestic cloud subscriptions.' },
+      { id: 'tax-002', taxId: 'TAX-GST-12', name: 'GST Hardware / IT Equipment', taxType: 'GST', taxRate: 12.0, status: 'Active', description: 'Standard 12% GST for IT hardware.' },
+      { id: 'tax-003', taxId: 'TAX-GST-05', name: 'GST Concessional', taxType: 'GST', taxRate: 5.0, status: 'Active', description: 'Subsidized basic utilities.' },
+      { id: 'tax-004', taxId: 'TAX-GST-28', name: 'GST Luxury / High-Tier', taxType: 'GST', taxRate: 28.0, status: 'Active', description: 'Premium specialized offerings.' },
+      { id: 'tax-005', taxId: 'TAX-EU-VAT-20', name: 'EU Digital Services VAT', taxType: 'VAT', taxRate: 20.0, status: 'Active', description: 'European cross-border VAT.' }
+    ];
+
+    const INITIAL_DISCOUNTS = [
+      { id: 'disc-001', discountId: 'WELCOME20', name: 'Welcome Early Adopter', type: 'Percentage', value: 20.0, scope: 'all', targetItems: [], startDate: '2026-01-01', expiryDate: '2026-12-31', status: 'Active' },
+      { id: 'disc-002', discountId: 'ANNUAL50', name: 'Annual Commitment Saver', type: 'Fixed Amount', value: 50.0, scope: 'plans', targetItems: ['Starter Yearly', 'Pro Yearly'], startDate: '2026-01-15', expiryDate: '2026-11-30', status: 'Active' },
+      { id: 'disc-003', discountId: 'GROWTH50', name: 'Startup Acceleration Grant', type: 'Percentage', value: 50.0, scope: 'products', targetItems: ['Brightloop Cloud Starter'], startDate: '2026-02-01', expiryDate: '2026-10-31', status: 'Active' }
+    ];
+
+    // --- 4. DATA PERSISTENCE ---
+    function loadAllData() {
+      state.products = JSON.parse(localStorage.getItem(KEYS.PRODUCTS)) || [...INITIAL_PRODUCTS];
+      state.plans = JSON.parse(localStorage.getItem(KEYS.PLANS)) || [...INITIAL_PLANS];
+      state.taxes = JSON.parse(localStorage.getItem(KEYS.TAXES)) || [...INITIAL_TAXES];
+      state.discounts = JSON.parse(localStorage.getItem(KEYS.DISCOUNTS)) || [...INITIAL_DISCOUNTS];
+
+      saveAllData();
+      updateBadgeCounts();
+    }
+
+    function saveAllData() {
+      localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(state.products));
+      localStorage.setItem(KEYS.PLANS, JSON.stringify(state.plans));
+      localStorage.setItem(KEYS.TAXES, JSON.stringify(state.taxes));
+      localStorage.setItem(KEYS.DISCOUNTS, JSON.stringify(state.discounts));
+      updateBadgeCounts();
+    }
+
+    function resetAllDemoData() {
+      state.products = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+      state.plans = JSON.parse(JSON.stringify(INITIAL_PLANS));
+      state.taxes = JSON.parse(JSON.stringify(INITIAL_TAXES));
+      state.discounts = JSON.parse(JSON.stringify(INITIAL_DISCOUNTS));
+      saveAllData();
+      renderCurrentView();
+      showToast('All 4 Brightloop modules restored to sample data!', 'info');
+    }
+
+    function updateBadgeCounts() {
+      document.getElementById('badge-products-count').textContent = state.products.length;
+      document.getElementById('badge-plans-count').textContent = state.plans.length;
+      document.getElementById('badge-taxes-count').textContent = state.taxes.length;
+      document.getElementById('badge-discounts-count').textContent = state.discounts.length;
+    }
+
+    // --- 5. VIEW SWITCHING (SPA NAVIGATION) ---
+    function switchView(viewName) {
+      state.currentView = viewName;
+
+      // Update sidebar nav buttons
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('text-white', 'bg-indigo-600', 'shadow-sm', 'shadow-indigo-600/30');
+        btn.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60');
+      });
+
+      const activeNav = document.getElementById(`nav-${viewName}`);
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60');
+        activeNav.classList.add('text-white', 'bg-indigo-600', 'shadow-sm', 'shadow-indigo-600/30');
+      }
+
+      // Hide all panels, show selected
+      document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
+      const activePanel = document.getElementById(`view-${viewName}`);
+      if (activePanel) activePanel.classList.remove('hidden');
+
+      // Update Header Title
+      const titles = {
+        dashboard: 'Overview Dashboard',
+        products: 'Products & Catalog',
+        plans: 'Subscription Plans',
+        taxes: 'Tax Management',
+        discounts: 'Discounts Management'
+      };
+      document.getElementById('header-title').textContent = titles[viewName] || 'Dashboard';
+
+      closeSidebar();
+      renderCurrentView();
+    }
+
+    function renderCurrentView() {
+      if (state.currentView === 'dashboard') renderDashboard();
+      else if (state.currentView === 'products') renderProducts();
+      else if (state.currentView === 'plans') renderPlans();
+      else if (state.currentView === 'taxes') renderTaxes();
+      else if (state.currentView === 'discounts') renderDiscounts();
+    }
+
+    // --- 6. RENDER DASHBOARD ---
+    function renderDashboard() {
+      document.getElementById('dash-products-total').textContent = state.products.length;
+      document.getElementById('dash-products-desc').textContent = `${state.products.filter(p => p.status === 'Active').length} active in catalog`;
+
+      document.getElementById('dash-plans-total').textContent = state.plans.length;
+      document.getElementById('dash-plans-desc').textContent = `${state.plans.filter(p => p.billingCycle === 'Monthly' || p.billingCycle === 'Yearly').length} Monthly/Yearly tiers`;
+
+      document.getElementById('dash-taxes-total').textContent = state.taxes.length;
+      document.getElementById('dash-taxes-desc').textContent = `${state.taxes.filter(t => t.taxType === 'GST').length} GST brackets (5, 12, 18, 28%)`;
+
+      const activeDiscs = state.discounts.filter(d => d.status === 'Active' && (!d.expiryDate || d.expiryDate >= new Date().toISOString().split('T')[0])).length;
+      document.getElementById('dash-discounts-total').textContent = state.discounts.length;
+      document.getElementById('dash-discounts-desc').textContent = `${activeDiscs} active promotional codes`;
+
+      document.getElementById('dash-gst-summary').textContent = `${state.taxes.filter(t => t.taxType === 'GST').length} GST Rules`;
+      document.getElementById('dash-discount-active-summary').textContent = `${activeDiscs} Active Coupons`;
+    }
+
+    // --- 7. RENDER PRODUCTS ---
+    function renderProducts() {
+      const q = (document.getElementById('prod-search')?.value || '').toLowerCase().trim();
+      const cat = document.getElementById('prod-cat-filter')?.value || 'All';
+      const stat = document.getElementById('prod-status-filter')?.value || 'All';
+      const sort = document.getElementById('prod-sort')?.value || 'newest';
+
+      let list = state.products.filter(p => {
+        const mQ = !q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
+        const mC = cat === 'All' || p.category === cat;
+        const mS = stat === 'All' || p.status === stat;
+        return mQ && mC && mS;
+      });
+
+      if (sort === 'name-asc') list.sort((a,b) => a.name.localeCompare(b.name));
+      else if (sort === 'price-low') list.sort((a,b) => a.basePrice - b.basePrice);
+      else if (sort === 'price-high') list.sort((a,b) => b.basePrice - a.basePrice);
+
+      const tbody = document.getElementById('prod-table-body');
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No products found.</td></tr>`;
+        return;
+      }
+
+      list.forEach(p => {
+        const linkedPlansCount = state.plans.filter(pl => pl.linkedProduct === p.name).length;
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors';
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-semibold text-slate-900">
+            ${p.name}
+            <span class="block font-mono text-[11px] text-slate-400">${p.sku}</span>
+          </td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px]">${p.category}</span></td>
+          <td class="px-4 py-3">${p.billingType}</td>
+          <td class="px-4 py-3 font-mono font-bold">$${Number(p.basePrice).toFixed(2)}</td>
+          <td class="px-4 py-3">
+            <span onclick="switchView('plans'); document.getElementById('plan-search').value = '${p.name}'; renderPlans();" class="cursor-pointer font-semibold text-indigo-600 hover:underline">
+              ${linkedPlansCount} plan(s)
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${p.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${p.status}</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="openEditProductModal('${p.id}')" class="text-indigo-600 hover:text-indigo-900 font-semibold mr-2">Edit</button>
+            <button onclick="confirmDeleteRecord('product', '${p.id}', '${p.name}')" class="text-rose-600 hover:text-rose-900 font-semibold">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- 8. RENDER PLANS ---
+    function renderPlans() {
+      const q = (document.getElementById('plan-search')?.value || '').toLowerCase().trim();
+      const cycle = document.getElementById('plan-cycle-filter')?.value || 'All';
+      const stat = document.getElementById('plan-status-filter')?.value || 'All';
+      const sort = document.getElementById('plan-sort')?.value || 'newest';
+
+      let list = state.plans.filter(p => {
+        const mQ = !q || p.name.toLowerCase().includes(q) || p.planId.toLowerCase().includes(q) || p.linkedProduct.toLowerCase().includes(q);
+        const mC = cycle === 'All' || p.billingCycle === cycle;
+        const mS = stat === 'All' || p.status === stat;
+        return mQ && mC && mS;
+      });
+
+      if (sort === 'name-asc') list.sort((a,b) => a.name.localeCompare(b.name));
+      else if (sort === 'price-low') list.sort((a,b) => a.price - b.price);
+      else if (sort === 'price-high') list.sort((a,b) => b.price - a.price);
+
+      const tbody = document.getElementById('plan-table-body');
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">No subscription plans found.</td></tr>`;
+        return;
+      }
+
+      list.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors';
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-semibold text-slate-900">${p.name}</td>
+          <td class="px-4 py-3 font-mono text-[11px] text-slate-500">${p.planId}</td>
+          <td class="px-4 py-3 font-medium text-slate-700">${p.linkedProduct}</td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700">${p.billingCycle}</span></td>
+          <td class="px-4 py-3 font-mono font-bold">$${Number(p.price).toFixed(2)}</td>
+          <td class="px-4 py-3 font-mono">${p.minQuantity || 1} min</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${p.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${p.status}</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="openEditPlanModal('${p.id}')" class="text-indigo-600 hover:text-indigo-900 font-semibold mr-2">Edit</button>
+            <button onclick="confirmDeleteRecord('plan', '${p.id}', '${p.name}')" class="text-rose-600 hover:text-rose-900 font-semibold">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- 9. RENDER TAXES ---
+    function renderTaxes() {
+      const q = (document.getElementById('tax-search')?.value || '').toLowerCase().trim();
+      const type = document.getElementById('tax-type-filter')?.value || 'All';
+      const stat = document.getElementById('tax-status-filter')?.value || 'All';
+      const sort = document.getElementById('tax-sort')?.value || 'newest';
+
+      let list = state.taxes.filter(t => {
+        const mQ = !q || t.name.toLowerCase().includes(q) || t.taxId.toLowerCase().includes(q);
+        const mT = type === 'All' || t.taxType === type;
+        const mS = stat === 'All' || t.status === stat;
+        return mQ && mT && mS;
+      });
+
+      if (sort === 'name-asc') list.sort((a,b) => a.name.localeCompare(b.name));
+      else if (sort === 'rate-high') list.sort((a,b) => b.taxRate - a.taxRate);
+      else if (sort === 'rate-low') list.sort((a,b) => a.taxRate - b.taxRate);
+
+      const tbody = document.getElementById('tax-table-body');
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No tax rates found.</td></tr>`;
+        return;
+      }
+
+      list.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors';
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-mono text-[11px] text-slate-500">${t.taxId}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${t.name}</td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700">${t.taxType}</span></td>
+          <td class="px-4 py-3 font-mono font-bold text-slate-900">${Number(t.taxRate).toFixed(2)}%</td>
+          <td class="px-4 py-3 text-slate-500 text-[11px] truncate max-w-xs">${t.description || '-'}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${t.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${t.status}</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="openEditTaxModal('${t.id}')" class="text-indigo-600 hover:text-indigo-900 font-semibold mr-2">Edit</button>
+            <button onclick="confirmDeleteRecord('tax', '${t.id}', '${t.name}')" class="text-rose-600 hover:text-rose-900 font-semibold">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- 10. RENDER DISCOUNTS ---
+    function renderDiscounts() {
+      const q = (document.getElementById('disc-search')?.value || '').toLowerCase().trim();
+      const type = document.getElementById('disc-type-filter')?.value || 'All';
+      const scope = document.getElementById('disc-scope-filter')?.value || 'All';
+      const stat = document.getElementById('disc-status-filter')?.value || 'All';
+
+      const today = new Date().toISOString().split('T')[0];
+
+      let list = state.discounts.filter(d => {
+        const mQ = !q || d.name.toLowerCase().includes(q) || d.discountId.toLowerCase().includes(q);
+        const mT = type === 'All' || d.type === type;
+        const mSc = scope === 'All' || d.scope === scope;
+
+        const isExpired = d.expiryDate && d.expiryDate < today;
+        let mSt = true;
+        if (stat === 'Active') mSt = d.status === 'Active' && !isExpired;
+        else if (stat === 'Expired') mSt = isExpired;
+        else if (stat === 'Inactive') mSt = d.status === 'Inactive';
+
+        return mQ && mT && mSc && mSt;
+      });
+
+      const tbody = document.getElementById('disc-table-body');
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">No discounts found.</td></tr>`;
+        return;
+      }
+
+      list.forEach(d => {
+        const isExpired = d.expiryDate && d.expiryDate < today;
+        const valFormatted = d.type === 'Percentage' ? `${d.value}%` : `$${Number(d.value).toFixed(2)}`;
+        const scopeText = d.scope === 'all' ? 'All Items' : (d.scope === 'products' ? `${(d.targetItems||[]).length} Products` : `${(d.targetItems||[]).length} Plans`);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors';
+        tr.innerHTML = `
+          <td class="px-4 py-3 font-mono font-bold text-slate-800">${d.discountId}</td>
+          <td class="px-4 py-3 font-semibold text-slate-900">${d.name}</td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700">${d.type}</span></td>
+          <td class="px-4 py-3 font-mono font-bold text-indigo-600">${valFormatted}</td>
+          <td class="px-4 py-3 text-slate-600">${scopeText}</td>
+          <td class="px-4 py-3 font-mono text-[11px] ${isExpired ? 'text-rose-600 font-semibold' : 'text-slate-500'}">
+            ${d.startDate} to ${d.expiryDate} ${isExpired ? '(Expired)' : ''}
+          </td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${isExpired ? 'bg-rose-50 text-rose-700' : (d.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500')}">
+              ${isExpired ? 'Expired' : d.status}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="openEditDiscountModal('${d.id}')" class="text-indigo-600 hover:text-indigo-900 font-semibold mr-2">Edit</button>
+            <button onclick="confirmDeleteRecord('discount', '${d.id}', '${d.name}')" class="text-rose-600 hover:text-rose-900 font-semibold">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- 11. MODAL HELPERS & CRUD HANDLERS ---
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // Products CRUD
+    function openAddProductModal() {
+      document.getElementById('modal-prod-title').textContent = 'Add Product';
+      document.getElementById('prod-form-id').value = '';
+      document.getElementById('prod-form-name').value = '';
+      document.getElementById('prod-form-sku').value = '';
+      document.getElementById('prod-form-category').value = 'SaaS Platform';
+      document.getElementById('prod-form-status').value = 'Active';
+      document.getElementById('prod-form-billing').value = 'Recurring';
+      document.getElementById('prod-form-price').value = '';
+      document.getElementById('prod-form-desc').value = '';
+      openModal('modal-product');
+    }
+
+    function openEditProductModal(id) {
+      const p = state.products.find(item => item.id === id);
+      if (!p) return;
+      document.getElementById('modal-prod-title').textContent = 'Edit Product';
+      document.getElementById('prod-form-id').value = p.id;
+      document.getElementById('prod-form-name').value = p.name;
+      document.getElementById('prod-form-sku').value = p.sku;
+      document.getElementById('prod-form-category').value = p.category;
+      document.getElementById('prod-form-status').value = p.status;
+      document.getElementById('prod-form-billing').value = p.billingType;
+      document.getElementById('prod-form-price').value = p.basePrice;
+      document.getElementById('prod-form-desc').value = p.description || '';
+      openModal('modal-product');
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prod-form-id').value;
+      const isCreate = !id;
+      const prod = {
+        id: id || `prod-${Date.now().toString().slice(-4)}`,
+        name: document.getElementById('prod-form-name').value.trim(),
+        sku: document.getElementById('prod-form-sku').value.trim().toUpperCase(),
+        category: document.getElementById('prod-form-category').value,
+        status: document.getElementById('prod-form-status').value,
+        billingType: document.getElementById('prod-form-billing').value,
+        basePrice: parseFloat(document.getElementById('prod-form-price').value),
+        description: document.getElementById('prod-form-desc').value.trim()
+      };
+
+      if (isCreate) state.products.unshift(prod);
+      else {
+        const idx = state.products.findIndex(p => p.id === id);
+        if (idx !== -1) state.products[idx] = prod;
+      }
+
+      saveAllData();
+      closeModal('modal-product');
+      renderProducts();
+      showToast(`Product "${prod.name}" saved!`, 'success');
+    }
+
+    // Plans CRUD
+    function openAddPlanModal() {
+      document.getElementById('modal-plan-title').textContent = 'Add Subscription Plan';
+      document.getElementById('plan-form-id').value = '';
+      document.getElementById('plan-form-name').value = '';
+      document.getElementById('plan-form-planid').value = '';
+      document.getElementById('plan-form-price').value = '';
+      document.getElementById('plan-form-minqty').value = '1';
+
+      // Populate linked product dropdown dynamically from state.products
+      const prodSelect = document.getElementById('plan-form-product');
+      prodSelect.innerHTML = '';
+      state.products.forEach(p => {
+        prodSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+      });
+
+      openModal('modal-plan');
+    }
+
+    function openEditPlanModal(id) {
+      const p = state.plans.find(item => item.id === id);
+      if (!p) return;
+      document.getElementById('modal-plan-title').textContent = 'Edit Subscription Plan';
+      document.getElementById('plan-form-id').value = p.id;
+      document.getElementById('plan-form-name').value = p.name;
+      document.getElementById('plan-form-planid').value = p.planId;
+      document.getElementById('plan-form-cycle').value = p.billingCycle;
+      document.getElementById('plan-form-price').value = p.price;
+      document.getElementById('plan-form-minqty').value = p.minQuantity || 1;
+      document.getElementById('plan-form-status').value = p.status;
+
+      const prodSelect = document.getElementById('plan-form-product');
+      prodSelect.innerHTML = '';
+      state.products.forEach(prod => {
+        prodSelect.innerHTML += `<option value="${prod.name}" ${prod.name === p.linkedProduct ? 'selected' : ''}>${prod.name}</option>`;
+      });
+
+      openModal('modal-plan');
+    }
+
+    function savePlan(e) {
+      e.preventDefault();
+      const id = document.getElementById('plan-form-id').value;
+      const isCreate = !id;
+      const plan = {
+        id: id || `plan-${Date.now().toString().slice(-4)}`,
+        name: document.getElementById('plan-form-name').value.trim(),
+        planId: document.getElementById('plan-form-planid').value.trim().toUpperCase(),
+        linkedProduct: document.getElementById('plan-form-product').value,
+        billingCycle: document.getElementById('plan-form-cycle').value,
+        price: parseFloat(document.getElementById('plan-form-price').value),
+        minQuantity: parseInt(document.getElementById('plan-form-minqty').value, 10) || 1,
+        status: document.getElementById('plan-form-status').value
+      };
+
+      if (isCreate) state.plans.unshift(plan);
+      else {
+        const idx = state.plans.findIndex(p => p.id === id);
+        if (idx !== -1) state.plans[idx] = plan;
+      }
+
+      saveAllData();
+      closeModal('modal-plan');
+      renderPlans();
+      showToast(`Plan "${plan.name}" saved!`, 'success');
+    }
+
+    // Taxes CRUD
+    function applyTaxPreset(name, code, type, rate) {
+      document.getElementById('tax-form-name').value = name;
+      document.getElementById('tax-form-taxid').value = code;
+      document.getElementById('tax-form-type').value = type;
+      document.getElementById('tax-form-rate').value = rate;
+    }
+
+    function openAddTaxModal() {
+      document.getElementById('modal-tax-title').textContent = 'Add Tax Rate';
+      document.getElementById('tax-form-id').value = '';
+      document.getElementById('tax-form-name').value = '';
+      document.getElementById('tax-form-taxid').value = '';
+      document.getElementById('tax-form-type').value = 'GST';
+      document.getElementById('tax-form-rate').value = '18.00';
+      document.getElementById('tax-form-desc').value = '';
+      openModal('modal-tax');
+    }
+
+    function openEditTaxModal(id) {
+      const t = state.taxes.find(item => item.id === id);
+      if (!t) return;
+      document.getElementById('modal-tax-title').textContent = 'Edit Tax Rate';
+      document.getElementById('tax-form-id').value = t.id;
+      document.getElementById('tax-form-name').value = t.name;
+      document.getElementById('tax-form-taxid').value = t.taxId;
+      document.getElementById('tax-form-type').value = t.taxType;
+      document.getElementById('tax-form-rate').value = t.taxRate;
+      document.getElementById('tax-form-status').value = t.status;
+      document.getElementById('tax-form-desc').value = t.description || '';
+      openModal('modal-tax');
+    }
+
+    function saveTax(e) {
+      e.preventDefault();
+      const id = document.getElementById('tax-form-id').value;
+      const rateVal = parseFloat(document.getElementById('tax-form-rate').value);
+
+      if (rateVal < 0 || rateVal > 100) {
+        showToast('Tax rate must be between 0% and 100%!', 'error');
+        return;
+      }
+
+      const isCreate = !id;
+      const tax = {
+        id: id || `tax-${Date.now().toString().slice(-4)}`,
+        name: document.getElementById('tax-form-name').value.trim(),
+        taxId: document.getElementById('tax-form-taxid').value.trim().toUpperCase(),
+        taxType: document.getElementById('tax-form-type').value,
+        taxRate: rateVal,
+        status: document.getElementById('tax-form-status').value,
+        description: document.getElementById('tax-form-desc').value.trim()
+      };
+
+      if (isCreate) state.taxes.unshift(tax);
+      else {
+        const idx = state.taxes.findIndex(t => t.id === id);
+        if (idx !== -1) state.taxes[idx] = tax;
+      }
+
+      saveAllData();
+      closeModal('modal-tax');
+      renderTaxes();
+      showToast(`Tax rate "${tax.name}" saved!`, 'success');
+    }
+
+    // Discounts CRUD
+    function updateDiscValLabel(type) {
+      const lbl = document.getElementById('disc-val-label');
+      lbl.textContent = type === 'Percentage' ? 'Discount Value (Max 100%) *' : 'Discount Value ($ Amount) *';
+    }
+
+    function toggleScopeInputs(scope) {
+      const container = document.getElementById('disc-scope-checkboxes');
+      if (scope === 'all') {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      container.classList.remove('hidden');
+      container.innerHTML = '';
+
+      if (scope === 'products') {
+        state.products.forEach(p => {
+          container.innerHTML += `
+            <label class="flex items-center gap-2 p-1 hover:bg-slate-100 rounded">
+              <input type="checkbox" value="${p.name}" class="disc-target-cb rounded text-indigo-600" />
+              <span>${p.name}</span>
+            </label>
+          `;
+        });
+      } else if (scope === 'plans') {
+        state.plans.forEach(pl => {
+          container.innerHTML += `
+            <label class="flex items-center gap-2 p-1 hover:bg-slate-100 rounded">
+              <input type="checkbox" value="${pl.name}" class="disc-target-cb rounded text-indigo-600" />
+              <span>${pl.name} (${pl.billingCycle})</span>
+            </label>
+          `;
+        });
+      }
+    }
+
+    function openAddDiscountModal() {
+      document.getElementById('modal-disc-title').textContent = 'Add Discount';
+      document.getElementById('disc-form-id').value = '';
+      document.getElementById('disc-form-name').value = '';
+      document.getElementById('disc-form-code').value = '';
+      document.getElementById('disc-form-type').value = 'Percentage';
+      updateDiscValLabel('Percentage');
+      document.getElementById('disc-form-val').value = '';
+
+      const today = new Date().toISOString().split('T')[0];
+      const nextYr = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0];
+      document.getElementById('disc-form-start').value = today;
+      document.getElementById('disc-form-expiry').value = nextYr;
+
+      document.getElementById('disc-form-scope').value = 'all';
+      toggleScopeInputs('all');
+
+      openModal('modal-discount');
+    }
+
+    function openEditDiscountModal(id) {
+      const d = state.discounts.find(item => item.id === id);
+      if (!d) return;
+      document.getElementById('modal-disc-title').textContent = 'Edit Discount';
+      document.getElementById('disc-form-id').value = d.id;
+      document.getElementById('disc-form-name').value = d.name;
+      document.getElementById('disc-form-code').value = d.discountId;
+      document.getElementById('disc-form-type').value = d.type;
+      updateDiscValLabel(d.type);
+      document.getElementById('disc-form-val').value = d.value;
+      document.getElementById('disc-form-start').value = d.startDate;
+      document.getElementById('disc-form-expiry').value = d.expiryDate;
+
+      document.getElementById('disc-form-scope').value = d.scope;
+      toggleScopeInputs(d.scope);
+
+      document.querySelectorAll('.disc-target-cb').forEach(cb => {
+        cb.checked = (d.targetItems || []).includes(cb.value);
+      });
+
+      openModal('modal-discount');
+    }
+
+    function saveDiscount(e) {
+      e.preventDefault();
+      const val = parseFloat(document.getElementById('disc-form-val').value);
+      const type = document.getElementById('disc-form-type').value;
+
+      if (type === 'Percentage' && val > 100) {
+        showToast('Percentage discount cannot exceed 100%!', 'error');
+        return;
+      }
+
+      const start = document.getElementById('disc-form-start').value;
+      const expiry = document.getElementById('disc-form-expiry').value;
+      if (start && expiry && expiry < start) {
+        showToast('Expiry date cannot be earlier than start date!', 'error');
+        return;
+      }
+
+      const id = document.getElementById('disc-form-id').value;
+      const isCreate = !id;
+      const scope = document.getElementById('disc-form-scope').value;
+      const targets = Array.from(document.querySelectorAll('.disc-target-cb:checked')).map(cb => cb.value);
+
+      const disc = {
+        id: id || `disc-${Date.now().toString().slice(-4)}`,
+        name: document.getElementById('disc-form-name').value.trim(),
+        discountId: document.getElementById('disc-form-code').value.trim().toUpperCase(),
+        type: type,
+        value: val,
+        startDate: start,
+        expiryDate: expiry,
+        scope: scope,
+        targetItems: targets,
+        status: 'Active'
+      };
+
+      if (isCreate) state.discounts.unshift(disc);
+      else {
+        const idx = state.discounts.findIndex(d => d.id === id);
+        if (idx !== -1) state.discounts[idx] = disc;
+      }
+
+      saveAllData();
+      closeModal('modal-discount');
+      renderDiscounts();
+      showToast(`Discount "${disc.discountId}" saved!`, 'success');
+    }
+
+    // --- 12. GENERIC CONFIRM DELETE ---
+    function confirmDeleteRecord(type, id, name) {
+      document.getElementById('delete-modal-msg').innerHTML = `Are you sure you want to delete <strong>"${name}"</strong>?`;
+      const btn = document.getElementById('confirm-delete-action');
+      btn.onclick = () => {
+        if (type === 'product') {
+          state.products = state.products.filter(p => p.id !== id);
+          renderProducts();
+        } else if (type === 'plan') {
+          state.plans = state.plans.filter(p => p.id !== id);
+          renderPlans();
+        } else if (type === 'tax') {
+          state.taxes = state.taxes.filter(t => t.id !== id);
+          renderTaxes();
+        } else if (type === 'discount') {
+          state.discounts = state.discounts.filter(d => d.id !== id);
+          renderDiscounts();
+        }
+        saveAllData();
+        closeModal('modal-delete');
+        showToast(`"${name}" was deleted.`, 'info');
+      };
+      openModal('modal-delete');
+    }
+
+    // --- 13. TOAST FEEDBACK ---
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-emerald-600 text-white shadow-emerald-200',
+        error: 'bg-rose-600 text-white shadow-rose-200',
+        info: 'bg-indigo-600 text-white shadow-indigo-200'
+      };
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold animate-fade-in ${colors[type] || colors.info}`;
+      toast.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" class="ml-2 hover:opacity-75 font-bold">✕</button>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // --- 14. SIDEBAR RESPONSIVE TOGGLES ---
+    function openSidebar() {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.remove('hidden');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.add('hidden');
+    }
+
+    // --- 15. INITIALIZE ON LOAD ---
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAllData();
+      renderDashboard();
+    });
+  </script>
+</body>
+</html>
